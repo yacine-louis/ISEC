@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="CipherX — Professional cryptography tool. Encrypt and decrypt text using Caesar, Affine, and Substitution ciphers with multi-language frequency analysis." />
+    <title>CipherX — Cryptography Suite</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+     APP SHELL
+════════════════════════════════════════════════════════════════════════ -->
+    <div id="app">
+
+        <!-- ─── SIDEBAR ─────────────────────────────────────────────────── -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="8" width="28" height="20" rx="3" stroke="url(#grad)" stroke-width="2" />
+                        <path d="M10 8V6a6 6 0 0 1 12 0v2" stroke="url(#grad)" stroke-width="2"
+                            stroke-linecap="round" />
+                        <circle cx="16" cy="18" r="3" fill="url(#grad)" />
+                        <line x1="16" y1="21" x2="16" y2="24" stroke="url(#grad)" stroke-width="2"
+                            stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#6c63ff" />
+                                <stop offset="100%" stop-color="#00d4ff" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-name">CipherX</span>
+                    <span class="logo-sub">Cryptography Suite</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-panel="encrypt" id="nav-encrypt">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none" />
+                        </svg>
+                    </span>
+                    <span class="nav-label">Encrypt</span>
+                </button>
+
+                <button class="nav-item" data-panel="decrypt" id="nav-decrypt">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" />
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1" stroke-dasharray="3 2" />
+                            <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none" />
+                            <path d="M17 6l2 2-2 2" />
+                        </svg>
+                    </span>
+                    <span class="nav-label">Decrypt</span>
+                </button>
+
+                <button class="nav-item" data-panel="frequency" id="nav-frequency">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round">
+                            <rect x="3" y="14" width="3" height="7" rx="1.5" />
+                            <rect x="8" y="10" width="3" height="11" rx="1.5" />
+                            <rect x="13" y="6" width="3" height="15" rx="1.5" />
+                            <rect x="18" y="11" width="3" height="10" rx="1.5" />
+                            <line x1="3" y1="3" x2="21" y2="3" />
+                        </svg>
+                    </span>
+                    <span class="nav-label">Frequency Analysis</span>
+                </button>
+
+                <button class="nav-item" data-panel="settings" id="nav-settings">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                    </span>
+                    <span class="nav-label">Settings</span>
+                </button>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <span class="version-badge">v1.0.0</span>
+                <span class="version-label">Secure &amp; Local</span>
+            </div>
+        </aside>
+
+        <!-- ─── MAIN CONTENT ─────────────────────────────────────────────── -->
+        <main class="main-content">
+
+            <!-- Header Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="page-title" id="page-title">Encrypt</h1>
+                    <span class="page-sub" id="page-sub">Transform plaintext into ciphertext</span>
+                </div>
+                <div class="topbar-right">
+                    <div class="status-dot" id="status-dot" title="Ready"></div>
+                    <span class="status-label" id="status-label">Ready</span>
+                </div>
+            </header>
+
+            <!-- ──────────────────────────────────────────────────────────────
+         PANEL: ENCRYPT
+    ─────────────────────────────────────────────────────────────── -->
+            <section class="panel" id="panel-encrypt">
+                <div class="panel-grid">
+
+                    <!-- Left: Input -->
+                    <div class="card input-card">
+                        <div class="card-header">
+                            <span class="card-title">Plaintext</span>
+                            <div class="card-actions">
+                                <button class="icon-btn" id="enc-load-file" title="Load from file">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path
+                                            d="M4 4h5l2 2h5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="enc-clear" title="Clear">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <line x1="15" y1="5" x2="5" y2="15" />
+                                        <line x1="5" y1="5" x2="15" y2="15" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea class="text-area" id="enc-input" placeholder="Enter your plaintext here…"
+                            spellcheck="false" dir="auto"></textarea>
+                        <div class="char-counter"><span id="enc-char-count">0</span> characters</div>
+                    </div>
+
+                    <!-- Right: Output -->
+                    <div class="card output-card">
+                        <div class="card-header">
+                            <span class="card-title">Ciphertext</span>
+                            <div class="card-actions">
+                                <button class="icon-btn" id="enc-copy" title="Copy result">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <rect x="8" y="8" width="9" height="9" rx="1.5" />
+                                        <path d="M3 13V4a1 1 0 0 1 1-1h9" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="enc-export" title="Export result">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M3 13v4h14v-4" />
+                                        <path d="M10 3v9" />
+                                        <path d="M7 9l3 3 3-3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="output-area" id="enc-output" dir="auto">
+                            <span class="output-placeholder">Encrypted text will appear here…</span>
+                        </div>
+                    </div>
+
+                    <!-- Controls row -->
+                    <div class="card controls-card full-width">
+                        <div class="controls-row">
+
+                            <!-- Algorithm -->
+                            <div class="control-group">
+                                <label class="control-label">Algorithm</label>
+                                <div class="select-wrapper">
+                                    <select id="enc-cipher" class="select-input">
+                                        <option value="caesar">Caesar Cipher</option>
+                                        <option value="affine">Affine Cipher</option>
+                                        <option value="substitution">Substitution Cipher</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Language -->
+                            <div class="control-group">
+                                <label class="control-label">Language</label>
+                                <div class="select-wrapper">
+                                    <select id="enc-language" class="select-input">
+                                        <option value="english">English</option>
+                                        <option value="french">French</option>
+                                        <option value="kabyle">Kabyle</option>
+                                        <option value="arabic">Arabic / العربية</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Key Params -->
+                            <div class="control-group" id="enc-caesar-params">
+                                <label class="control-label">Shift (key)</label>
+                                <input type="number" class="param-input" id="enc-shift" value="3" min="1" max="100" />
+                            </div>
+
+                            <div class="control-group hidden" id="enc-affine-params">
+                                <label class="control-label">Key (a × b)</label>
+                                <div class="inline-inputs">
+                                    <input type="number" class="param-input small" id="enc-a" value="5" min="1"
+                                        placeholder="a" />
+                                    <span class="inline-sep">×</span>
+                                    <input type="number" class="param-input small" id="enc-b" value="8" min="0"
+                                        placeholder="b" />
+                                </div>
+                            </div>
+
+                            <div class="control-group hidden" id="enc-sub-params">
+                                <label class="control-label">Key (permutation)</label>
+                                <input type="text" class="param-input wide" id="enc-key"
+                                    placeholder="qwertyuiopasdfghjklzxcvbnm" spellcheck="false" />
+                            </div>
+
+                            <!-- Action -->
+                            <div class="control-group action-group">
+                                <button class="btn-primary" id="enc-btn">
+                                    <span class="btn-icon">⚡</span>
+                                    <span class="btn-text">Encrypt</span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Hidden file input -->
+                <input type="file" id="enc-file-input" accept=".txt" class="hidden-file" />
+            </section>
+
+            <!-- ──────────────────────────────────────────────────────────────
+         PANEL: DECRYPT
+    ─────────────────────────────────────────────────────────────── -->
+            <section class="panel hidden" id="panel-decrypt">
+                <div class="panel-grid">
+
+                    <div class="card input-card">
+                        <div class="card-header">
+                            <span class="card-title">Ciphertext</span>
+                            <div class="card-actions">
+                                <button class="icon-btn" id="dec-load-file" title="Load from file">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path
+                                            d="M4 4h5l2 2h5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="dec-clear" title="Clear">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <line x1="15" y1="5" x2="5" y2="15" />
+                                        <line x1="5" y1="5" x2="15" y2="15" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea class="text-area" id="dec-input" placeholder="Paste encrypted text here…"
+                            spellcheck="false" dir="auto"></textarea>
+                        <div class="char-counter"><span id="dec-char-count">0</span> characters</div>
+                    </div>
+
+                    <div class="card output-card">
+                        <div class="card-header">
+                            <span class="card-title">Plaintext</span>
+                            <div class="card-actions">
+                                <div class="detected-badge hidden" id="dec-detected-badge"></div>
+                                <button class="icon-btn" id="dec-copy" title="Copy result">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <rect x="8" y="8" width="9" height="9" rx="1.5" />
+                                        <path d="M3 13V4a1 1 0 0 1 1-1h9" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="dec-export" title="Export result">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M3 13v4h14v-4" />
+                                        <path d="M10 3v9" />
+                                        <path d="M7 9l3 3 3-3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="output-area" id="dec-output" dir="auto">
+                            <span class="output-placeholder">Decrypted text will appear here…</span>
+                        </div>
+                    </div>
+
+                    <div class="card controls-card full-width">
+                        <div class="controls-row">
+
+                            <div class="control-group">
+                                <label class="control-label">Algorithm</label>
+                                <div class="select-wrapper">
+                                    <select id="dec-cipher" class="select-input">
+                                        <option value="auto">🔍 Auto Detect</option>
+                                        <option value="caesar">Caesar Cipher</option>
+                                        <option value="affine">Affine Cipher</option>
+                                        <option value="substitution">Substitution Cipher</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Language</label>
+                                <div class="select-wrapper">
+                                    <select id="dec-language" class="select-input">
+                                        <option value="auto">🔍 Auto Detect</option>
+                                        <option value="english">English</option>
+                                        <option value="french">French</option>
+                                        <option value="kabyle">Kabyle</option>
+                                        <option value="arabic">Arabic / العربية</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Method</label>
+                                <div class="select-wrapper">
+                                    <select id="dec-method" class="select-input">
+                                        <option value="frequency">Frequency Analysis</option>
+                                        <option value="key">Known Key</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="control-group hidden" id="dec-caesar-params">
+                                <label class="control-label">Shift</label>
+                                <input type="number" class="param-input" id="dec-shift" value="3" min="1" />
+                            </div>
+                            <div class="control-group hidden" id="dec-affine-params">
+                                <label class="control-label">Key (a × b)</label>
+                                <div class="inline-inputs">
+                                    <input type="number" class="param-input small" id="dec-a" value="5"
+                                        placeholder="a" />
+                                    <span class="inline-sep">×</span>
+                                    <input type="number" class="param-input small" id="dec-b" value="8"
+                                        placeholder="b" />
+                                </div>
+                            </div>
+                            <div class="control-group hidden" id="dec-sub-params">
+                                <label class="control-label">Key</label>
+                                <input type="text" class="param-input wide" id="dec-key" placeholder="permutation key"
+                                    spellcheck="false" />
+                            </div>
+
+                            <div class="control-group action-group">
+                                <button class="btn-primary" id="dec-btn">
+                                    <span class="btn-icon">🔓</span>
+                                    <span class="btn-text">Decrypt</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New: Decrypt Graph -->
+                    <div class="card full-width hidden" id="dec-chart-container"
+                        style="min-height: 280px; margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="card-title">Frequency Analysis of Decrypted Output</span>
+                            <div class="legend" style="display:flex; gap:12px; font-size:0.72rem; color:var(--text-2);">
+                                <span><span class="legend-dot observed"
+                                        style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Observed</span>
+                                <span><span class="legend-dot reference"
+                                        style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent-2); margin-right:4px;"></span>Reference</span>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper" style="height: 200px; position:relative;">
+                            <canvas id="dec-freq-chart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="file" id="dec-file-input" accept=".txt" class="hidden-file" />
+            </section>
+
+            <!-- ──────────────────────────────────────────────────────────────
+         PANEL: FREQUENCY ANALYSIS
+    ─────────────────────────────────────────────────────────────── -->
+            <section class="panel hidden" id="panel-frequency">
+                <div class="panel-grid freq-layout">
+
+                    <div class="card input-card">
+                        <div class="card-header">
+                            <span class="card-title">Input Text</span>
+                            <div class="card-actions">
+                                <button class="icon-btn" id="freq-load-file" title="Load file">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path
+                                            d="M4 4h5l2 2h5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="freq-clear" title="Clear">
+                                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <line x1="15" y1="5" x2="5" y2="15" />
+                                        <line x1="5" y1="5" x2="15" y2="15" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea class="text-area short" id="freq-input"
+                            placeholder="Enter or paste text to analyse its letter frequencies…" spellcheck="false"
+                            dir="auto"></textarea>
+                        <div class="freq-controls">
+                            <div class="select-wrapper small-select">
+                                <select id="freq-language" class="select-input">
+                                    <option value="english">English</option>
+                                    <option value="french">French</option>
+                                    <option value="kabyle">Kabyle</option>
+                                    <option value="arabic">Arabic</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary small-btn" id="freq-btn">
+                                <span class="btn-icon">📊</span> Analyse
+                            </button>
+                            <button class="btn-secondary small-btn" id="freq-auto-detect-btn">
+                                🔍 Auto Language
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <span class="card-title">Letter Frequency Distribution</span>
+                            <div class="legend">
+                                <span class="legend-dot observed"></span><span>Observed</span>
+                                <span class="legend-dot reference"></span><span>Reference</span>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="freq-chart"></canvas>
+                        </div>
+                        <div class="freq-stats" id="freq-stats"></div>
+                    </div>
+
+                </div>
+                <input type="file" id="freq-file-input" accept=".txt" class="hidden-file" />
+            </section>
+
+            <!-- ──────────────────────────────────────────────────────────────
+         PANEL: SETTINGS
+    ─────────────────────────────────────────────────────────────── -->
+            <section class="panel hidden" id="panel-settings">
+                <div class="settings-grid">
+
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">Appearance</span></div>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div>
+                                    <div class="setting-name">Dark Mode</div>
+                                    <div class="setting-desc">Toggle between dark and light theme</div>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" id="settings-dark-mode" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <div class="setting-name">Cipher Animation</div>
+                                    <div class="setting-desc">Show scan-line effect on encrypt</div>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" id="settings-animation" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">Defaults</span></div>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div class="setting-name">Default Language</div>
+                                <div class="select-wrapper">
+                                    <select id="settings-default-lang" class="select-input">
+                                        <option value="english">English</option>
+                                        <option value="french">French</option>
+                                        <option value="kabyle">Kabyle</option>
+                                        <option value="arabic">Arabic</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-name">Default Cipher</div>
+                                <div class="select-wrapper">
+                                    <select id="settings-default-cipher" class="select-input">
+                                        <option value="caesar">Caesar Cipher</option>
+                                        <option value="affine">Affine Cipher</option>
+                                        <option value="substitution">Substitution Cipher</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">About</span></div>
+                        <div class="about-block">
+                            <div class="about-logo">CipherX</div>
+                            <div class="about-desc">
+                                A professional cryptography tool supporting Caesar, Affine, and Substitution ciphers
+                                with multi-language frequency analysis for English, French, Kabyle, and Arabic.
+                            </div>
+                            <div class="about-tags">
+                                <span class="tag">Python 3</span>
+                                <span class="tag">Flask</span>
+                                <span class="tag">Frequency Analysis</span>
+                                <span class="tag">Multi-Language</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Loading overlay (cipher animation) -->
+    <div class="scan-overlay hidden" id="scan-overlay">
+        <div class="scan-line"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

@@ -44,58 +44,53 @@ def substitution_cipher(text, alphabet, key, mode="encrypt"):
 
     return result
 
-# # The key difference from Caesar and affine is that there is no key to solve for mathematically 
-# # — instead you build a mapping directly by ranking both the ciphertext letters and 
-# # the language letters by frequency and pairing them up position by position.
-# # This is also why substitution frequency analysis is the least reliable of the three — 
-# # Caesar and affine crack exactly given enough text, 
-# # but substitution produces a best guess that almost always needs manual tweaking.
-# def frequency_analysis_substitution(ciphertext, alphabet, language_freq):
-#     """
-#     Attempt to decrypt a substitution cipher using frequency analysis.
 
-#     :param ciphertext: encrypted text
-#     :param alphabet: custom alphabet string
-#     :param language_freq: dict of {letter: frequency} e.g {"e": 0.13, "t": 0.09, ...}
-#     :return: best guess decrypted text
-#     """
+def frequency_analysis_substitution(ciphertext, alphabet, language_freq):
+    """
+    Attempt to decrypt a substitution cipher using frequency analysis.
 
-#     alphabet = alphabet.lower()
+    Strategy: rank ciphertext letters by observed frequency and map them
+    position-by-position to the language's most-frequent letters.
+    This is a best-guess — works well with long ciphertext.
 
-#     # count letter frequencies in ciphertext
-#     counts = {char: 0 for char in alphabet}
-#     for char in ciphertext.lower():
-#         if char in alphabet:
-#             counts[char] += 1
+    :param ciphertext: encrypted text
+    :param alphabet: custom alphabet string
+    :param language_freq: dict of {letter: frequency} e.g {"e": 0.13, "t": 0.09, ...}
+    :return: best guess decrypted text
+    """
 
-#     # sort ciphertext letters by frequency (most → least frequent)
-#     sorted_ciphertext_letters = sorted(counts, key=counts.get, reverse=True)
+    alphabet = alphabet.lower()
 
-#     # sort language letters by frequency (most → least frequent)
-#     sorted_language_letters = sorted(language_freq, key=language_freq.get, reverse=True)
+    # Count letter frequencies in ciphertext
+    counts = {char: 0 for char in alphabet}
+    for char in ciphertext.lower():
+        if char in alphabet:
+            counts[char] += 1
 
-#     # map most frequent ciphertext letter → most frequent language letter, and so on
-#     guessed_key = {
-#         cipher_char: lang_char
-#         for cipher_char, lang_char in zip(sorted_ciphertext_letters, sorted_language_letters)
-#     }
+    # Sort ciphertext letters by frequency (most → least frequent)
+    sorted_ciphertext_letters = sorted(counts, key=counts.get, reverse=True)
 
-#     result = ""
-#     for char in ciphertext:
-#         lower_char = char.lower()
-#         if lower_char in guessed_key:
-#             new_char = guessed_key[lower_char]
-#             if char.isupper():
-#                 new_char = new_char.upper()
-#             result += new_char
-#         else:
-#             result += char
+    # Sort language letters by frequency (most → least frequent)
+    sorted_language_letters = sorted(language_freq, key=language_freq.get, reverse=True)
 
-#     return result
+    # Build guessed substitution key: map each cipher letter to a plaintext letter
+    guessed_key = {
+        cipher_char: lang_char
+        for cipher_char, lang_char in zip(sorted_ciphertext_letters, sorted_language_letters)
+    }
 
+    result = ""
+    for char in ciphertext:
+        lower_char = char.lower()
+        if lower_char in guessed_key:
+            new_char = guessed_key[lower_char]
+            if char.isupper():
+                new_char = new_char.upper()
+            result += new_char
+        else:
+            result += char
 
-
-
+    return result
 
 
 
