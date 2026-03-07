@@ -1,5 +1,8 @@
-# cesar cipher each letter in the text is shifted by a fixed number of positions in the alphabet
+import json
+from collections import Counter
 
+
+# cesar cipher each letter in the text is shifted by a fixed number of positions in the alphabet
 def cesar_cipher(text, alphabet, shift, mode="encrypt"):
     """
     :param text: input text
@@ -37,43 +40,146 @@ def cesar_cipher(text, alphabet, shift, mode="encrypt"):
     return result
 
 
-
-# https://raw.org/tool/caesar-cipher/#:~:text=Cracking%20it%20can%20be%20done,key%20more%20quickly%20and%20accurately.&text=In%20our%20cracking%20algorithm%2C%20we,and%20successfully%20decrypt%20the%20message.&text=By%20using%20the%20crack_caesar(),the%20decryption%20process%20in%20action.
-
-def frequency_analysis_caesar(ciphertext, alphabet, language_freq):
+def crack_caesar_frequency(
+    ciphertext,
+    alphabet,
+    ngram_json_path,
+    top_n=10
+):
     """
-    Attempt to decrypt a Caesar cipher using frequency analysis.
+    Generic frequency attack for:
+        - unigram
+        - bigram
+        - trigram
+        - etc.
 
-    :param ciphertext: encrypted text
-    :param alphabet: custom alphabet string
-    :param language_freq: list of letters ordered by frequency in the language (most → least frequent)
-    :return: best guess decrypted text
+    It works by:
+    1. Extracting n-grams from ciphertext
+    2. Loading n-gram frequency table
+    3. Pairing top cipher n-grams with top language n-grams
+    4. Computing shift votes
+    5. Picking majority shift
     """
-    
+
     alphabet = alphabet.lower()
-    m = len(alphabet)
+    n = len(alphabet)
 
-    counts = {char: 0 for char in alphabet}
-    for char in ciphertext.lower():
-        if char in alphabet:
-            counts[char] += 1
+    # -------------------------------
+    # Load Frequency Table
+    # -------------------------------
+    with open(ngram_json_path, "r", encoding="utf8") as f:
+        freq_table = json.load(f)
 
-    total = sum(counts.values())
+    top_language_ngrams = sorted(
+        freq_table,
+        key=freq_table.get,
+        reverse=True
+    )[:top_n]
 
-    best_shift = 0
-    best_score = float("-inf")
+    # -------------------------------
+    # Extract Cipher n-grams
+    # -------------------------------
+    letters = [
+        c.lower() for c in ciphertext
+        if c.lower() in alphabet
+    ]
 
-    # try all possible shifts and score each one
-    for shift in range(1, m):
-        score = 0
-        for char in alphabet:
-            decrypted_char = alphabet[(alphabet.index(char) - shift) % m]
-            expected_freq = language_freq.get(decrypted_char, 0)
-            observed_freq = counts[char] / total if total > 0 else 0
-            score += observed_freq * expected_freq  # dot product scoring
+    ngram_size = len(next(iter(top_language_ngrams)))  # auto-detect
 
-        if score > best_score:
-            best_score = score
-            best_shift = shift
+    cipher_ngrams = [
+        "".join(letters[i:i + ngram_size])
+        for i in range(len(letters) - ngram_size + 1)
+        if len(letters[i:i + ngram_size]) == ngram_size
+    ]
 
-    return cesar_cipher(ciphertext, alphabet, best_shift, mode="decrypt")
+    cipher_freq = Counter(cipher_ngrams)
+
+    top_cipher_ngrams = [
+        bg for bg, _ in cipher_freq.most_common(top_n)
+    ]
+
+    # -------------------------------
+    # Voting
+    # -------------------------------
+    shift_votes = Counter()
+
+    for cipher_ng in top_cipher_ngrams:
+        for lang_ng in top_language_ngrams:
+
+            shifts = []
+
+            for i in range(ngram_size):
+                shift = (
+                    alphabet.index(cipher_ng[i])
+                    - alphabet.index(lang_ng[i])
+                ) % n
+                shifts.append(shift)
+
+            # Only vote if all letters agree on same shift
+            if len(set(shifts)) == 1:
+                shift_votes[shifts[0]] += 1
+
+    if not shift_votes:
+        return ciphertext, 0
+
+    best_shift = shift_votes.most_common(1)[0][0]
+    
+    # -------------------------------
+    # Decrypt
+    # -------------------------------
+    plaintext = cesar_cipher(ciphertext, alphabet, best_shift, mode="decrypt")
+
+    print("Top cipher ngrams :", top_cipher_ngrams)
+    print("Top language ngrams:", top_language_ngrams)
+    print("Shift votes       :", shift_votes.most_common(5))
+    print("Best shift        :", best_shift)
+
+    return plaintext, best_shift
+
+# ---------------------------
+# Test Generic Frequency Attack
+# ---------------------------
+
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+
+ciphertext = """
+Lw fdq dovr eh d ixq zdb wr vxusulvh rwkhuv. Brx pljkw fkrrvh wr vkduh d udqgrp vhqwhqfh rq vrfldo phgld mxvw wr vhh zkdw wbsh ri uhdfwlrq lw jduqhuv iurp rwkhuv.
+"""
+
+# ---- UNIGRAM TEST ----
+plaintext1, shift1 = crack_caesar_frequency(
+    ciphertext=ciphertext,
+    alphabet=alphabet,
+    ngram_json_path="grams/english_1grams.json",
+    top_n=10
+)
+
+print("\n========== UNIGRAM RESULT ==========")
+print("Shift:", shift1)
+print("Plaintext:\n", plaintext1)
+
+
+# ---- BIGRAM TEST ----
+plaintext2, shift2 = crack_caesar_frequency(
+    ciphertext=ciphertext,
+    alphabet=alphabet,
+    ngram_json_path="grams/english_2grams.json",
+    top_n=20
+)
+
+print("\n========== BIGRAM RESULT ==========")
+print("Shift:", shift2)
+print("Plaintext:\n", plaintext2)
+
+
+# ---- TRIGRAM TEST ----
+plaintext3, shift3 = crack_caesar_frequency(
+    ciphertext=ciphertext,
+    alphabet=alphabet,
+    ngram_json_path="grams/english_3grams.json",
+    top_n=50
+)
+
+print("\n========== TRIGRAM RESULT ==========")
+print("Shift:", shift3)
+print("Plaintext:\n", plaintext3)

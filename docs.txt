@@ -1,0 +1,58 @@
+Books are extracted from Project Gutenberg, Which is a library of over 75,000 free eBooks
+
+
+For Bigrams
+✅ 1.You extract frequent bigrams from Ciphertext
+
+✅ 2.You extract frequent bigrams from English Frequency table
+
+✅ 3. You Try to Match Cipher Bigrams With English Bigrams
+  For every pair: (cipher_bigram, english_bigram)
+  You compute a candidate shift.
+  You compute shift from:
+    shift1 = (index(cipher[0]) - index(english[0])) mod 26
+    shift2 = (index(cipher[1]) - index(english[1])) mod 26
+
+✅ 4. You Only Accept the Shift If Both Letters Agree
+  if shift_from_first == shift_from_second:
+    shift_votes[shift_from_first] += 1
+
+✅ 5. Vote for Each Valid Shift (vote majeur)
+  Shift 5 → 12 votes
+  Shift 8 → 3 votes
+  Shift 2 → 7 votes
+  ...
+
+✅ 6. You Pick the Most Frequent Shift (like 5 in the previous case)
+
+
+
+
+
+
+for Unigrams
+✅ 1. Extract Frequent Letters From Ciphertext
+✅ 2. Extract Frequent Letters From English Frequency Table
+✅ 3. Try to Match Cipher Letters With English Letters
+  For every pair:
+    (cipher_letter, english_letter)
+
+  Compute the candidate shift:
+    shift = (index(cipher_letter) - index(english_letter)) mod 26
+
+✅ 4. Collect Shift Votes
+  For each pair:
+    shift_votes[shift] += 1
+
+✅ 5. Pick the Most Voted Shift (Majority Vote)
+  Best_shift = argmax(shift_votes)
+
+```
+1. Get top N frequent letters from ciphertext
+2. Get top N frequent letters from English table
+3. For every pair (cipher_letter, english_letter):
+       compute shift
+       add vote
+4. Pick shift with highest votes
+5. Decrypt with that shift
+```
