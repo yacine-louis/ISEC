@@ -190,7 +190,6 @@ function initEncryptPanel() {
       $("enc-key").value = "";
       $("enc-key").placeholder = placeholders[language] || "";
     }
-    document.body.classList.toggle("lang-arabic", language === "arabic");
   });
 
   // Load file
@@ -204,6 +203,8 @@ function initEncryptPanel() {
     $("enc-char-count").textContent = "0";
     output.innerHTML =
       '<span class="output-placeholder">Encrypted text will appear here…</span>';
+    const badge = $("enc-meta-badge");
+    if (badge) badge.classList.add("hidden");
   });
 
   // Copy
@@ -263,6 +264,19 @@ function initEncryptPanel() {
       await playScanAnimation();
       const data = await apiCall("/api/encrypt", body);
       setOutput(output, data.result);
+
+      let metaText = `Time: ${data.execution_time_ms}ms`;
+      if (data.meta) {
+          if (cipher === "caesar") metaText += ` | Shift: ${data.meta.shift}`;
+          if (cipher === "affine") metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
+          if (cipher === "substitution") metaText += ` | Key: ${data.meta.key}`;
+      }
+      const badge = $("enc-meta-badge");
+      if (badge) {
+          badge.textContent = metaText;
+          badge.classList.remove("hidden");
+      }
+
       showToast("Encryption complete ✓", "success");
       setStatus("Ready");
     } catch (e) {
@@ -316,9 +330,7 @@ function initDecryptPanel() {
 
   $("dec-language").addEventListener("change", () => {
     const language = $("dec-language").value;
-    document.body.classList.toggle("lang-arabic", language === "arabic");
   });
-
   $("dec-cipher").addEventListener("change", () => updateDecParams());
   updateDecParams();
 
@@ -332,6 +344,8 @@ function initDecryptPanel() {
       '<span class="output-placeholder">Decrypted text will appear here…</span>';
     $("dec-chart-container").classList.add("hidden");
     destroyFrequencyChart("dec-freq-chart");
+    const badge = $("dec-meta-badge");
+    if (badge) badge.classList.add("hidden");
   });
   $("dec-copy").addEventListener("click", () => {
     const txt = output.textContent;
@@ -372,6 +386,18 @@ function initDecryptPanel() {
       await playScanAnimation();
       const data = await apiCall("/api/decrypt", body);
       setOutput(output, data.result);
+
+      let metaText = `Time: ${data.execution_time_ms}ms`;
+      if (data.meta) {
+          if (cipher === "caesar") metaText += ` | Shift: ${data.meta.shift}`;
+          if (cipher === "affine") metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
+          if (cipher === "substitution") metaText += ` | Key: ${data.meta.key}`;
+      }
+      const badge = $("dec-meta-badge");
+      if (badge) {
+          badge.textContent = metaText;
+          badge.classList.remove("hidden");
+      }
 
       // Immediately load frequency data for the decrypted result
       try {
@@ -422,7 +448,6 @@ function updateDecParams() {
 function initFrequencyPanel() {
   $("freq-language").addEventListener("change", () => {
     const language = $("freq-language").value;
-    document.body.classList.toggle("lang-arabic", language === "arabic");
   });
 
   $("freq-clear").addEventListener("click", () => {

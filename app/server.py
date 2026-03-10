@@ -6,6 +6,7 @@ Flask REST API for CipherX — connects the frontend SPA to the Python cipher ba
 import sys
 import os
 import json
+import time
 
 # Ensure the project root is on the path so `src` is importable
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -107,6 +108,7 @@ def api_encrypt():
         return jsonify({"error": "No text provided"}), 400
 
     try:
+        start_time = time.perf_counter()
         alphabet = _get_alphabet(language)
 
         if cipher == "caesar":
@@ -130,11 +132,13 @@ def api_encrypt():
         else:
             return jsonify({"error": f"Unknown cipher: {cipher}"}), 400
 
+        end_time = time.perf_counter()
         return jsonify({
             "result": result,
             "cipher": cipher,
             "language": language,
             "meta": meta,
+            "execution_time_ms": round((end_time - start_time) * 1000, 2),
         })
 
     except ValueError as e:
@@ -172,6 +176,7 @@ def api_decrypt():
         return jsonify({"error": "No text provided"}), 400
 
     try:
+        start_time = time.perf_counter()
         if method == "frequency":
             ngram_size = int(data.get("ngram_size", 4))
             top_n = int(data.get("top_n", 10))  # default for caesar
@@ -218,12 +223,14 @@ def api_decrypt():
             else:
                 return jsonify({"error": f"Unknown cipher: {cipher}"}), 400
 
+        end_time = time.perf_counter()
         return jsonify({
             "result": result,
             "cipher": cipher,
             "language": language,
             "method": method,
             "meta": meta,
+            "execution_time_ms": round((end_time - start_time) * 1000, 2),
         })
 
     except ValueError as e:

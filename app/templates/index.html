@@ -12,7 +12,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -250,6 +250,7 @@
               <div class="card-header">
                 <span class="card-title">Ciphertext</span>
                 <div class="card-actions">
+                  <div class="detected-badge hidden" id="enc-meta-badge"></div>
                   <button class="icon-btn" id="enc-copy" title="Copy result">
                     <svg
                       viewBox="0 0 20 20"
@@ -441,7 +442,7 @@
                 <div class="card-actions">
                   <div
                     class="detected-badge hidden"
-                    id="dec-detected-badge"
+                    id="dec-meta-badge"
                   ></div>
                   <button class="icon-btn" id="dec-copy" title="Copy result">
                     <svg
