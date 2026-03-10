@@ -5,31 +5,62 @@ Flask REST API for CipherX — connects the frontend SPA to the Python cipher ba
 
 import sys
 import os
+import json
 
 # Ensure the project root is on the path so `src` is importable
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from flask import Flask, render_template, request, jsonify
-from src.cesar import cesar_cipher, frequency_analysis_caesar
-from src.affine import affine_cipher, frequency_analysis_affine
-from src.substitute import substitution_cipher, frequency_analysis_substitution
-from src.languages import ALPHABETS, FREQ_TABLES, list_languages, get_alphabet, get_freq_table
-from src.auto_detect import detect_language, detect_and_decrypt
+from flask import Flask, render_template, request, jsonify  # type: ignore
+from src.cesar import cesar_cipher, crack_caesar_frequency
+from src.affine import affine_cipher, crack_affine_frequency
+from src.substitute import substitution_cipher, crack_substitution_frequency
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+ALPHABETS = {
+    "english": "abcdefghijklmnopqrstuvwxyz",
+    "arabic": "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
+}
+
+FREQ_PATHS = {
+    "english": {
+        1: os.path.join(ROOT, "grams", "english_1grams.json"),
+        2: os.path.join(ROOT, "grams", "english_2grams.json"),
+        3: os.path.join(ROOT, "grams", "english_3grams.json"),
+        4: os.path.join(ROOT, "grams", "english_4grams.json"),
+    },
+    "arabic": {
+        1: os.path.join(ROOT, "grams", "arabic_1grams.json"),
+        2: os.path.join(ROOT, "grams", "arabic_2grams.json"),
+        3: os.path.join(ROOT, "grams", "arabic_3grams.json"),
+        4: os.path.join(ROOT, "grams", "arabic_4grams.json"),
+    },
+}
 
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
 
-def _get_language_data(language: str):
-    """Return (alphabet, freq_table) for the requested language."""
+def _get_alphabet(language: str):
+    """Return alphabet for the requested language."""
     lang = language.lower()
     if lang not in ALPHABETS:
         raise ValueError(f"Unknown language: {language}")
-    return ALPHABETS[lang], FREQ_TABLES[lang]
+    return ALPHABETS[lang]
+
+def _get_language_data(language: str, ngram_size: int = 4):
+    """Return (alphabet, freq_path) for the requested language and ngram size."""
+    lang = language.lower()
+    if lang not in ALPHABETS:
+        raise ValueError(f"Unknown language: {language}")
+    if ngram_size not in FREQ_PATHS[lang]:
+        raise ValueError(f"No frequency data for ngram size {ngram_size} in {language}")
+    return ALPHABETS[lang], FREQ_PATHS[lang][ngram_size]
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +77,7 @@ def api_languages():
     """Return available languages with their alphabets."""
     data = {
         lang: {"alphabet": ALPHABETS[lang], "size": len(ALPHABETS[lang])}
-        for lang in list_languages()
+        for lang in ALPHABETS
     }
     return jsonify({"languages": data})
 
@@ -76,7 +107,7 @@ def api_encrypt():
         return jsonify({"error": "No text provided"}), 400
 
     try:
-        alphabet, _ = _get_language_data(language)
+        alphabet = _get_alphabet(language)
 
         if cipher == "caesar":
             shift = int(data.get("shift", 3))
@@ -115,76 +146,77 @@ def api_encrypt():
 @app.route("/api/decrypt", methods=["POST"])
 def api_decrypt():
     """
-    Decrypt text with the specified cipher and optional keys, or via frequency analysis.
+    Decrypt text with the specified cipher and keys, or via frequency analysis.
 
     Expected JSON body:
     {
       "text": str,
-      "cipher": "caesar" | "affine" | "substitution" | "auto",
-      "language": str | "auto",
-      "method": "key" | "frequency",   # default: key
-      "shift": int,
-      "a": int,
-      "b": int,
-      "key": str
+      "cipher": "caesar" | "affine" | "substitution",
+      "language": str,
+      "method": "key" | "frequency",
+      "shift": int,          # Caesar key only
+      "a": int,              # Affine key only
+      "b": int,              # Affine key only
+      "key": str,            # Substitution key only
+      "ngram_size": int,     # Frequency only, 1-4
+      "top_n": int           # Frequency only for caesar/affine
     }
     """
     data = request.get_json(force=True)
     text    = data.get("text", "")
-    cipher  = data.get("cipher", "auto").lower()
-    language= data.get("language", "auto").lower()
-    method  = data.get("method", "frequency").lower()
+    cipher  = data.get("cipher", "caesar").lower()
+    language= data.get("language", "english").lower()
+    method  = data.get("method", "key").lower()
 
     if not text.strip():
         return jsonify({"error": "No text provided"}), 400
 
     try:
-        # Auto mode — frequency analysis across all ciphers
-        if cipher == "auto" or method == "frequency":
-            out = detect_and_decrypt(text, language if language != "auto" else None, cipher if cipher != "auto" else None)
-            return jsonify({
-                "result": out["decrypted_text"],
-                "detected_language": out["detected_language"],
-                "detected_cipher": out["detected_cipher"],
-                "score": out["score"],
-                "method": "frequency",
-            })
+        if method == "frequency":
+            ngram_size = int(data.get("ngram_size", 4))
+            top_n = int(data.get("top_n", 10))  # default for caesar
 
-        # Manual key-based decryption
-        alphabet, freq_table = _get_language_data(language if language != "auto" else detect_language(text))
+            if cipher == "caesar":
+                alphabet, freq_path = _get_language_data(language, ngram_size)
+                result, best_shift = crack_caesar_frequency(text, alphabet, freq_path, top_n=top_n)
+                meta = {"shift": best_shift}
 
-        if cipher == "caesar":
-            if method == "key":
+            elif cipher == "affine":
+                alphabet, freq_path = _get_language_data(language, ngram_size)
+                result, best = crack_affine_frequency(text, alphabet, freq_path, top_n=top_n)
+                meta = {"a": best[0], "b": best[1]}
+
+            elif cipher == "substitution":
+                alphabet, freq_path = _get_language_data(language, 4)
+                result, key_str = crack_substitution_frequency(text, alphabet, freq_path)
+                meta = {"key": key_str}
+
+            else:
+                return jsonify({"error": f"Unknown cipher: {cipher}"}), 400
+
+        else:  # method == "key"
+            alphabet = _get_alphabet(language)
+
+            if cipher == "caesar":
                 shift = int(data.get("shift", 0))
                 result = cesar_cipher(text, alphabet, shift, mode="decrypt")
                 meta = {"shift": shift}
-            else:
-                result = frequency_analysis_caesar(text, alphabet, freq_table)
-                meta = {}
 
-        elif cipher == "affine":
-            if method == "key":
+            elif cipher == "affine":
                 a = int(data.get("a", 5))
                 b = int(data.get("b", 8))
                 result = affine_cipher(text, alphabet, a, b, mode="decrypt")
                 meta = {"a": a, "b": b}
-            else:
-                result = frequency_analysis_affine(text, alphabet, freq_table)
-                meta = {}
 
-        elif cipher == "substitution":
-            if method == "key":
+            elif cipher == "substitution":
                 key = data.get("key", "")
                 if not key:
                     return jsonify({"error": "Substitution key required"}), 400
                 result = substitution_cipher(text, alphabet, key, mode="decrypt")
                 meta = {"key": key}
-            else:
-                result = frequency_analysis_substitution(text, alphabet, freq_table)
-                meta = {}
 
-        else:
-            return jsonify({"error": f"Unknown cipher: {cipher}"}), 400
+            else:
+                return jsonify({"error": f"Unknown cipher: {cipher}"}), 400
 
         return jsonify({
             "result": result,
@@ -219,7 +251,8 @@ def api_frequency():
         return jsonify({"error": "No text provided"}), 400
 
     try:
-        alphabet, freq_table = _get_language_data(language)
+        alphabet = _get_alphabet(language)
+        freq_path = FREQ_PATHS[language][1]  # use 1-grams for reference
 
         counts = {ch: 0 for ch in alphabet}
         for ch in text.lower():
@@ -230,8 +263,10 @@ def api_frequency():
         observed = {ch: round(cnt / total, 6) if total > 0 else 0 for ch, cnt in counts.items()}
 
         # Reference frequencies (normalised to same scale)
-        ref_total = sum(freq_table.values())
-        reference = {ch: round(freq_table.get(ch, 0) / ref_total, 6) for ch in alphabet}
+        with open(freq_path, "r", encoding="utf8") as f:
+            ref_freq = json.load(f)
+        ref_total = sum(ref_freq.values())
+        reference = {ch: round(ref_freq.get(ch, 0) / ref_total, 6) for ch in alphabet}
 
         return jsonify({
             "observed": observed,
@@ -243,15 +278,7 @@ def api_frequency():
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-
-
-@app.route("/api/detect-language", methods=["POST"])
-def api_detect_language():
-    """Auto-detect language from input text."""
-    data = request.get_json(force=True)
-    text = data.get("text", "")
-    if not text.strip():
-        return jsonify({"error": "No text provided"}), 400
-
-    lang = detect_language(text)
-    return jsonify({"language": lang, "alphabet": ALPHABETS[lang]})
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {e}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {e}"}), 500

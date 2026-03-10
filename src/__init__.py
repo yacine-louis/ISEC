@@ -3,36 +3,15 @@ src/__init__.py
 Public API for the ISEC cipher library.
 """
 
-from .cesar import cesar_cipher, frequency_analysis_caesar
-from .affine import affine_cipher, frequency_analysis_affine, mod_inverse
-from .substitute import substitution_cipher, frequency_analysis_substitution
-from .languages import (
-    ALPHABETS,
-    FREQ_TABLES,
-    get_alphabet,
-    get_freq_table,
-    list_languages,
-)
-from .auto_detect import detect_language, detect_and_decrypt
+from .cesar import cesar_cipher, crack_caesar_frequency
+from .affine import affine_cipher, crack_affine_frequency
+from .substitute import substitution_cipher, crack_substitution_frequency
 
 __all__ = [
-    # Caesar
     "cesar_cipher",
-    "frequency_analysis_caesar",
-    # Affine
+    "crack_caesar_frequency",
     "affine_cipher",
-    "frequency_analysis_affine",
-    "mod_inverse",
-    # Substitution
+    "crack_affine_frequency",
     "substitution_cipher",
-    "frequency_analysis_substitution",
-    # Languages
-    "ALPHABETS",
-    "FREQ_TABLES",
-    "get_alphabet",
-    "get_freq_table",
-    "list_languages",
-    # Auto-detection
-    "detect_language",
-    "detect_and_decrypt",
+    "crack_substitution_frequency",
 ]

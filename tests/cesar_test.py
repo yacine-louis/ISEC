@@ -1,7 +1,6 @@
 from src.substitute import substitution_cipher
 from src.affine import affine_cipher
-from src.cesar import cesar_cipher, frequency_analysis_caesar
-
+from src.cesar import cesar_cipher, crack_caesar_frequency
 
 def test_cesar_cipher():
     eng = "abcdefghijklmnopqrstuvwxyz"
@@ -53,17 +52,46 @@ def test_cesar_cipher():
 
 test_cesar_cipher()
 
+alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-eng = "abcdefghijklmnopqrstuvwxyz"
+ciphertext = """
+gura
+"""
 
-english_freq = {
-    "e": 0.13, "t": 0.09, "a": 0.08, "o": 0.07, "i": 0.07,
-    "n": 0.06, "s": 0.06, "h": 0.06, "r": 0.06, "d": 0.04,
-    "l": 0.04, "c": 0.03, "u": 0.03, "m": 0.02, "w": 0.02,
-    "f": 0.02, "g": 0.02, "y": 0.02, "p": 0.02, "b": 0.01,
-    "v": 0.01, "k": 0.01, "j": 0.001, "x": 0.001, "q": 0.001, "z": 0.001
-}
+# ---- UNIGRAM TEST ----
+plaintext1, shift1 = crack_caesar_frequency(
+    ciphertext=ciphertext,
+    alphabet=alphabet,
+    ngram_json_path="grams/english_1grams.json",
+    top_n=10
+)
 
-ciphertext = cesar_cipher("hello world this is a secret message", eng, 7)
-print(frequency_analysis_caesar(ciphertext, eng, english_freq))
-# → hello world this is a secret message
+print("\n========== UNIGRAM RESULT ==========")
+print("Shift:", shift1)
+print("Plaintext:\n", plaintext1)
+
+
+# # ---- BIGRAM TEST ----
+# plaintext2, shift2 = crack_caesar_frequency(
+#     ciphertext=ciphertext,
+#     alphabet=alphabet,
+#     ngram_json_path="grams/english_2grams.json",
+#     top_n=20
+# )
+
+# print("\n========== BIGRAM RESULT ==========")
+# print("Shift:", shift2)
+# print("Plaintext:\n", plaintext2)
+
+
+# # ---- TRIGRAM TEST ----
+# plaintext3, shift3 = crack_caesar_frequency(
+#     ciphertext=ciphertext,
+#     alphabet=alphabet,
+#     ngram_json_path="grams/english_3grams.json",
+#     top_n=50
+# )
+
+# print("\n========== TRIGRAM RESULT ==========")
+# print("Shift:", shift3)
+# print("Plaintext:\n", plaintext3)

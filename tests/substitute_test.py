@@ -1,4 +1,8 @@
-from src.substitute import substitution_cipher
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from src.substitute import substitution_cipher, crack_substitution_frequency
 from src.affine import affine_cipher
 from src.cesar import cesar_cipher
 
@@ -65,29 +69,57 @@ def test_substitution_cipher():
 
     print("All tests passed!")
 
+    print("All tests passed!")
+
 test_substitution_cipher()
 
-from subbreaker import Breaker
-import subbreaker
-import os
 
-library_path = os.path.dirname(subbreaker.__file__)
-english_json = os.path.join(library_path, "quadgram", "EN.json")
+def test_crack_substitution_frequency():
+    eng = "abcdefghijklmnopqrstuvwxyz"
+    key = "qwertyuiopasdfghjklzxcvbnm"  # QWERTY mapping
 
-with open(english_json) as f:
-    breaker = Breaker(f)
+    # Short plaintext for testing
+    plaintext = "the quick brown fox jumps over the lazy dog"
 
-key = "qwertyuiopasdfghjklzxcvbnm"
-plaintext = (
-    "the quick brown fox jumps over the lazy dog and then the dog jumped back over the fox "
-    "while the brown fox was still jumping quickly over every single lazy dog in the entire area "
-    "the weather was nice and the sun was shining brightly over the hills and the trees were green"
-)
-ciphertext = substitution_cipher(plaintext, "abcdefghijklmnopqrstuvwxyz", key)
+    # Encrypt
+    ciphertext = substitution_cipher(plaintext, eng, key)
 
-result = breaker.break_cipher(ciphertext, max_rounds=100, consolidate=3)
-print(f"result: {result.plaintext}")
-print(result.key)
-print(f"fitness: {result.fitness}")
-print(f"keys tried: {result.nbr_keys}")
-print(f"rounds: {result.nbr_rounds}")
+    # Crack using the function
+    quadgram_path = "grams/english_4grams.json"
+    cracked_plaintext, cracked_key = crack_substitution_frequency(
+        ciphertext, eng, quadgram_path, max_rounds=10000, consolidate=3
+    )
+
+    # Check if the cracked plaintext matches the original (case-insensitive)
+    assert cracked_plaintext.lower() == plaintext.lower(), f"Expected: {plaintext}, Got: {cracked_plaintext}"
+
+    print("Crack test passed!")
+
+test_crack_substitution_frequency()
+
+
+def test_arabic_substitution_crack():
+    arabic_alphabet = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي"
+    
+    # The provided Arabic text
+    plaintext = "النص العربي يستخدم هنا لاختبار خوارزمية التشفير بالاستبدال حيث يتم تغيير كل حرف بحرف آخر من الأبجدية مع الحفاظ على ترتيب النص."
+    
+    # Create a simple substitution key (shift by 3 positions)
+    shift = 3
+    key = arabic_alphabet[shift:] + arabic_alphabet[:shift]
+    
+    # Encrypt the text
+    ciphertext = substitution_cipher(plaintext, arabic_alphabet, key)
+    
+    # Crack using frequency analysis
+    quadgram_path = "grams/arabic_4grams.json"
+    cracked_plaintext, cracked_key = crack_substitution_frequency(
+        ciphertext, arabic_alphabet, quadgram_path, max_rounds=10000, consolidate=3
+    )
+    
+    # Check if the cracked plaintext matches the original
+    assert cracked_plaintext == plaintext, f"Expected: {plaintext}, Got: {cracked_plaintext}"
+    
+    print("Arabic crack test passed!")
+
+test_arabic_substitution_crack()

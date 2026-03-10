@@ -39,20 +39,8 @@ def cesar_cipher(text, alphabet, shift, mode="encrypt"):
 
     return result
 
-
-def crack_caesar_frequency(
-    ciphertext,
-    alphabet,
-    ngram_json_path,
-    top_n=10
-):
+def crack_caesar_frequency(ciphertext, alphabet, ngram_json_path, top_n=10):
     """
-    Generic frequency attack for:
-        - unigram
-        - bigram
-        - trigram
-        - etc.
-
     It works by:
     1. Extracting n-grams from ciphertext
     2. Loading n-gram frequency table
@@ -136,50 +124,14 @@ def crack_caesar_frequency(
 
     return plaintext, best_shift
 
-# ---------------------------
-# Test Generic Frequency Attack
-# ---------------------------
+# for 1-gram
+# crack_caesar_frequency(ciphertext, alphabet, 1_gram_json_path, top_n=10)
 
-alphabet = "abcdefghijklmnopqrstuvwxyz"
+# for 2-gram
+# crack_caesar_frequency(ciphertext, alphabet, 2_gram_json_path, top_n=20)
 
-ciphertext = """
-Lw fdq dovr eh d ixq zdb wr vxusulvh rwkhuv. Brx pljkw fkrrvh wr vkduh d udqgrp vhqwhqfh rq vrfldo phgld mxvw wr vhh zkdw wbsh ri uhdfwlrq lw jduqhuv iurp rwkhuv.
-"""
+# for 3-gram
+# crack_caesar_frequency(ciphertext, alphabet, 3_gram_json_path, top_n=50)
 
-# ---- UNIGRAM TEST ----
-plaintext1, shift1 = crack_caesar_frequency(
-    ciphertext=ciphertext,
-    alphabet=alphabet,
-    ngram_json_path="grams/english_1grams.json",
-    top_n=10
-)
-
-print("\n========== UNIGRAM RESULT ==========")
-print("Shift:", shift1)
-print("Plaintext:\n", plaintext1)
-
-
-# ---- BIGRAM TEST ----
-plaintext2, shift2 = crack_caesar_frequency(
-    ciphertext=ciphertext,
-    alphabet=alphabet,
-    ngram_json_path="grams/english_2grams.json",
-    top_n=20
-)
-
-print("\n========== BIGRAM RESULT ==========")
-print("Shift:", shift2)
-print("Plaintext:\n", plaintext2)
-
-
-# ---- TRIGRAM TEST ----
-plaintext3, shift3 = crack_caesar_frequency(
-    ciphertext=ciphertext,
-    alphabet=alphabet,
-    ngram_json_path="grams/english_3grams.json",
-    top_n=50
-)
-
-print("\n========== TRIGRAM RESULT ==========")
-print("Shift:", shift3)
-print("Plaintext:\n", plaintext3)
+# for 4-gram
+# crack_caesar_frequency(ciphertext, alphabet, 4_gram_json_path, top_n=100)
