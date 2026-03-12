@@ -51,7 +51,7 @@ def substitution_cipher(text, alphabet, key, mode="encrypt"):
 
     return result
 
-def crack_substitution_frequency(ciphertext, alphabet, ngram_json_path, max_rounds=10000, consolidate=5):
+def crack_substitution_frequency(ciphertext, alphabet, ngram_json_path, max_rounds=None, consolidate=None):
     """
     Crack a substitution cipher using hill-climbing with n-gram frequencies.
 
@@ -71,6 +71,16 @@ def crack_substitution_frequency(ciphertext, alphabet, ngram_json_path, max_roun
     """
     from src.breaker import Breaker
 
-    breaker = Breaker(ngram_json_path)
-    result = breaker.break_cipher(ciphertext, max_rounds, consolidate)
+    # Accept either a file-like object or a path to the n-gram JSON file
+    if hasattr(ngram_json_path, "read"):
+        breaker = Breaker(ngram_json_path)
+    else:
+        with open(ngram_json_path, encoding="utf-8") as fh:
+            breaker = Breaker(fh)
+    # Auto-tune rounds by text length for better performance
+    len_text = len([c for c in ciphertext if c in alphabet])
+    default_rounds = max(500, min(3000, len_text // 10))  # Scale: short=fast, long=thorough
+    rounds = max_rounds or default_rounds
+    cons = consolidate or 3
+    result = breaker.break_cipher(ciphertext, rounds, cons)
     return result.plaintext, result.key

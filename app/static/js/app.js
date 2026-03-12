@@ -267,9 +267,22 @@ function initEncryptPanel() {
 
       let metaText = `Time: ${data.execution_time_ms}ms`;
       if (data.meta) {
-          if (cipher === "caesar") metaText += ` | Shift: ${data.meta.shift}`;
-          if (cipher === "affine") metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
-          if (cipher === "substitution") metaText += ` | Key: ${data.meta.key}`;
+        if (cipher === "caesar" && data.meta.shift != null) {
+          metaText += ` | Shift: ${data.meta.shift}`;
+        }
+        if (
+          cipher === "affine" &&
+          data.meta.a != null &&
+          data.meta.b != null
+        ) {
+          metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
+        }
+        if (cipher === "substitution" && data.meta.key) {
+          metaText += ` | Key: ${data.meta.key}`;
+        }
+        if (data.meta.warning) {
+          metaText += ` | ${data.meta.warning}`;
+        }
       }
       const badge = $("enc-meta-badge");
       if (badge) {
@@ -373,8 +386,9 @@ function initDecryptPanel() {
       const top_n_map = { 1: 10, 2: 20, 3: 50, 4: 100 };
       body.top_n = top_n_map[ngram_size] || 10;
     } else if (cipher === "affine") {
-      const top_n_map = { 1: 8, 2: 6, 3: 5, 4: 4 };
-      body.top_n = top_n_map[ngram_size] || 8;
+      // Let the backend use its own default (top_n=6) for all ngram sizes,
+      // which matches the behaviour validated in unit tests.
+      // Do not set body.top_n here so the server falls back to the default.
     } else {
       body.top_n = 10;
     }
@@ -389,9 +403,22 @@ function initDecryptPanel() {
 
       let metaText = `Time: ${data.execution_time_ms}ms`;
       if (data.meta) {
-          if (cipher === "caesar") metaText += ` | Shift: ${data.meta.shift}`;
-          if (cipher === "affine") metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
-          if (cipher === "substitution") metaText += ` | Key: ${data.meta.key}`;
+        if (cipher === "caesar" && data.meta.shift != null) {
+          metaText += ` | Shift: ${data.meta.shift}`;
+        }
+        if (
+          cipher === "affine" &&
+          data.meta.a != null &&
+          data.meta.b != null
+        ) {
+          metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
+        }
+        if (cipher === "substitution" && data.meta.key) {
+          metaText += ` | Key: ${data.meta.key}`;
+        }
+        if (data.meta.warning) {
+          metaText += ` | ${data.meta.warning}`;
+        }
       }
       const badge = $("dec-meta-badge");
       if (badge) {

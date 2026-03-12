@@ -189,7 +189,18 @@ def api_decrypt():
             elif cipher == "affine":
                 alphabet, freq_path = _get_language_data(language, ngram_size)
                 result, best = crack_affine_frequency(text, alphabet, freq_path, top_n=top_n)
-                meta = {"a": best[0], "b": best[1]}
+                # crack_affine_frequency returns (ciphertext, None) if no suitable key is found
+                if best is None:
+                    meta = {
+                        "a": None,
+                        "b": None,
+                        "warning": (
+                            "No reliable affine key found with current settings; "
+                            "showing ciphertext unchanged."
+                        ),
+                    }
+                else:
+                    meta = {"a": best[0], "b": best[1]}
 
             elif cipher == "substitution":
                 alphabet, freq_path = _get_language_data(language, 4)
@@ -235,8 +246,8 @@ def api_decrypt():
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {e}"}), 500
+    # except Exception as e:
+    #     return jsonify({"error": f"Unexpected error: {e}"}), 500
 
 
 @app.route("/api/frequency", methods=["POST"])
@@ -285,7 +296,5 @@ def api_frequency():
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {e}"}), 500
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {e}"}), 500

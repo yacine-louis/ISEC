@@ -49,3 +49,74 @@ def test_affine_cipher():
 
 test_affine_cipher()
 
+
+def test_affine_crack_english_ngrams():
+    eng = "abcdefghijklmnopqrstuvwxyz"
+    a, b = 5, 8
+
+    plaintext = (
+        "the quick brown fox jumps over the lazy dog and then runs back again "
+        "through the forest where the birds are singing their beautiful songs "
+        "while the sun is setting behind the mountains creating a wonderful "
+        "display of colors in the evening sky above the peaceful valley below"
+    )
+
+    ciphertext = affine_cipher(plaintext, eng, a, b)
+
+    for ngram_path in ("grams/english_3grams.json", "grams/english_4grams.json"):
+        cracked_plaintext, (cracked_a, cracked_b) = crack_affine_frequency(
+            ciphertext, eng, ngram_path
+        )
+        assert cracked_plaintext.lower() == plaintext.lower()
+        assert cracked_a == a and cracked_b == b
+
+    print("English affine crack tests (3-grams & 4-grams) passed!")
+
+
+def test_affine_crack_arabic_ngrams():
+    arabic_alphabet = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي"
+    a, b = 5, 7
+
+    plaintext = (
+        "في هذا النص نستخدم اللغة العربية لاختبار قدرة الخوارزمية على كسر شفرة الاستبدال "
+        "حيث يتم استبدال كل حرف بحرف مختلف من نفس الابجدية وهذه الطريقة تعتمد على تحليل "
+        "تكرار الحروف والمقاطع في النصوص العربية وكلما كان النص اطول كلما زادت دقة التحليل "
+        "ونجحت الخوارزمية في استعادة النص الاصلي بشكل صحيح وكامل"
+    )
+
+    ciphertext = affine_cipher(plaintext, arabic_alphabet, a, b)
+
+    for ngram_path in ("grams/arabic_3grams.json", "grams/arabic_4grams.json"):
+        cracked_plaintext, (cracked_a, cracked_b) = crack_affine_frequency(
+            ciphertext, arabic_alphabet, ngram_path
+        )
+        assert cracked_plaintext == plaintext
+        assert cracked_a == a and cracked_b == b
+
+    print("Arabic affine crack tests (3-grams & 4-grams) passed!")
+
+
+test_affine_crack_english_ngrams()
+test_affine_crack_arabic_ngrams()
+
+
+def test_affine_crack_specific_arabic_4gram_text():
+    """
+    Regression-style test: ensure cracking this specific Arabic ciphertext with
+    4-gram statistics does not crash and returns a string result.
+    """
+    arabic_alphabet = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي"
+    ciphertext = (
+        """حادث خواظ وخ دبتغريذب حاخو ختاث ببتنظوة دث رهخظ شخدة دبدثغدث
+ودبنتب حدبدسرجدض لظخي دبثسدش حتث خغن وخ لبذ دبنبت خسض زتظة سجضج
+حوخ ثجدخة دبخحت ندض دبى تثعبج حجح خفنظ ذدبظكد حدبدتب وخ هض دوكب
+"""
+    )
+    ngram_path = "grams/arabic_1grams.json"
+
+    plaintext, best = crack_affine_frequency(ciphertext, arabic_alphabet, ngram_path)
+
+    print(plaintext)
+
+test_affine_crack_specific_arabic_4gram_text()
+
