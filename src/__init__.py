@@ -6,6 +6,7 @@ Public API for the ISEC cipher library.
 from .cesar import cesar_cipher, crack_caesar_frequency
 from .affine import affine_cipher, crack_affine_frequency
 from .substitute import substitution_cipher, crack_substitution_frequency
+from .breaker import Breaker
 
 __all__ = [
     "cesar_cipher",
@@ -14,4 +15,5 @@ __all__ = [
     "crack_affine_frequency",
     "substitution_cipher",
     "crack_substitution_frequency",
+    "Breaker",
 ]
