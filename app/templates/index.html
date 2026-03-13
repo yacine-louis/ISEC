@@ -7,7 +7,12 @@
       name="description"
       content="CipherX — Professional cryptography tool. Encrypt and decrypt text using Caesar, Affine, and Substitution ciphers with multi-language frequency analysis."
     />
-    <title>CipherX — Cryptography Suite</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../static/security-svgrepo-com.ico"
+    />
+    <title>Cryptography Tool</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,53 +39,20 @@
         <div class="sidebar-logo">
           <div class="logo-icon">
             <svg
-              viewBox="0 0 32 32"
+              viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <rect
-                x="2"
-                y="8"
-                width="28"
-                height="20"
-                rx="3"
-                stroke="url(#grad)"
-                stroke-width="2"
+              <path
+                opacity="0.4"
+                d="M18.3301 5.67L6.59009 17.41C6.15009 17.85 5.41008 17.79 5.05008 17.27C3.81008 15.46 3.08008 13.32 3.08008 11.12V6.73C3.08008 5.91 3.70008 4.98 4.46008 4.67L10.0301 2.39C11.2901 1.87 12.6901 1.87 13.9501 2.39L17.9901 4.03999C18.6601 4.30999 18.8301 5.17 18.3301 5.67Z"
+                fill="currentColor"
               />
               <path
-                d="M10 8V6a6 6 0 0 1 12 0v2"
-                stroke="url(#grad)"
-                stroke-width="2"
-                stroke-linecap="round"
+                d="M19.27 7.04012C19.92 6.49012 20.91 6.96011 20.91 7.81011V11.1201C20.91 16.0101 17.36 20.5901 12.51 21.9301C12.18 22.0201 11.82 22.0201 11.48 21.9301C10.06 21.5301 8.74 20.8601 7.61 19.9801C7.13 19.6101 7.08001 18.9101 7.50001 18.4801C9.68001 16.2501 16.06 9.75012 19.27 7.04012Z"
+                fill="currentColor"
               />
-              <circle cx="16" cy="18" r="3" fill="url(#grad)" />
-              <line
-                x1="16"
-                y1="21"
-                x2="16"
-                y2="24"
-                stroke="url(#grad)"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-              <defs>
-                <linearGradient
-                  id="grad"
-                  x1="0"
-                  y1="0"
-                  x2="32"
-                  y2="32"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop offset="0%" stop-color="#6c63ff" />
-                  <stop offset="100%" stop-color="#00d4ff" />
-                </linearGradient>
-              </defs>
             </svg>
-          </div>
-          <div class="logo-text">
-            <span class="logo-name">CipherX</span>
-            <span class="logo-sub">Cryptography Suite</span>
           </div>
         </div>
 
@@ -170,12 +142,6 @@
             <span class="nav-label">Settings</span>
           </button>
         </nav>
-
-        <!-- Footer -->
-        <div class="sidebar-footer">
-          <span class="version-badge">v1.0.0</span>
-          <span class="version-label">Secure &amp; Local</span>
-        </div>
       </aside>
 
       <!-- ─── MAIN CONTENT ─────────────────────────────────────────────── -->
@@ -440,10 +406,7 @@
               <div class="card-header">
                 <span class="card-title">Plaintext</span>
                 <div class="card-actions">
-                  <div
-                    class="detected-badge hidden"
-                    id="dec-meta-badge"
-                  ></div>
+                  <div class="detected-badge hidden" id="dec-meta-badge"></div>
                   <button class="icon-btn" id="dec-copy" title="Copy result">
                     <svg
                       viewBox="0 0 20 20"
@@ -636,7 +599,7 @@
                 <div class="select-wrapper small-select">
                   <select id="freq-language" class="select-input">
                     <option value="english">English</option>
-                    <option value="arabic">Arabic</option>
+                    <option value="arabic">Arabic / العربية</option>
                   </select>
                 </div>
                 <button class="btn-primary small-btn" id="freq-btn">
@@ -715,8 +678,6 @@
                   <div class="select-wrapper">
                     <select id="settings-default-lang" class="select-input">
                       <option value="english">English</option>
-                      <option value="french">French</option>
-                      <option value="kabyle">Kabyle</option>
                       <option value="arabic">Arabic</option>
                     </select>
                   </div>
@@ -741,9 +702,9 @@
               <div class="about-block">
                 <div class="about-logo">CipherX</div>
                 <div class="about-desc">
-                  A professional cryptography tool supporting Caesar, Affine,
+                  Cryptography tool supporting Caesar, Affine,
                   and Substitution ciphers with multi-language frequency
-                  analysis for English, French, Kabyle, and Arabic.
+                  analysis for English and Arabic.
                 </div>
                 <div class="about-tags">
                   <span class="tag">Python 3</span>

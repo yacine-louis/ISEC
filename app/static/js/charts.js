@@ -24,6 +24,21 @@ function renderFrequencyChart(canvasId, labels, observed, reference, language) {
   const accentBorder = "rgba(108,99,255,1)";
   const refBorder = "rgba(0,212,255,0.9)";
 
+  // Adapt chart styling to current theme (dark vs light mode)
+  const rootStyles = getComputedStyle(document.body);
+  const tickColor =
+    rootStyles.getPropertyValue("--text-3").trim() || "#535870";
+  const isLightMode = document.body.classList.contains("light-mode");
+  const gridColorX = isLightMode
+    ? "rgba(0,0,0,0.04)"
+    : "rgba(255,255,255,0.04)";
+  const gridColorY = isLightMode
+    ? "rgba(0,0,0,0.10)"
+    : "rgba(255,255,255,0.05)";
+  const axisBorderColor = isLightMode
+    ? "rgba(0,0,0,0.15)"
+    : "rgba(255,255,255,0.07)";
+
   const data = {
     labels,
     datasets: [
@@ -75,27 +90,27 @@ function renderFrequencyChart(canvasId, labels, observed, reference, language) {
     scales: {
       x: {
         ticks: {
-          color: "#535870",
+          color: tickColor,
           font: {
             family: "'Noto Sans Arabic', 'JetBrains Mono', monospace",
             size: fontSize,
           },
           maxRotation: 45,
         },
-        grid: { color: "rgba(255,255,255,0.04)" },
-        border: { color: "rgba(255,255,255,0.07)" },
+        grid: { color: gridColorX },
+        border: { color: axisBorderColor },
       },
       y: {
         ticks: {
-          color: "#535870",
+          color: tickColor,
           font: {
             family: "'Noto Sans Arabic', 'JetBrains Mono', monospace",
             size: fontSize,
           },
           callback: (v) => (v * 100).toFixed(1) + "%",
         },
-        grid: { color: "rgba(255,255,255,0.05)" },
-        border: { color: "rgba(255,255,255,0.07)" },
+        grid: { color: gridColorY },
+        border: { color: axisBorderColor },
         beginAtZero: true,
       },
     },

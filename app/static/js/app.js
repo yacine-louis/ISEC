@@ -10,7 +10,7 @@ const state = {
   currentPanel: "encrypt",
   settings: {
     darkMode: true,
-    animation: true,
+    animation: false,
     defaultLang: "english",
     defaultCipher: "caesar",
   },
@@ -270,11 +270,7 @@ function initEncryptPanel() {
         if (cipher === "caesar" && data.meta.shift != null) {
           metaText += ` | Shift: ${data.meta.shift}`;
         }
-        if (
-          cipher === "affine" &&
-          data.meta.a != null &&
-          data.meta.b != null
-        ) {
+        if (cipher === "affine" && data.meta.a != null && data.meta.b != null) {
           metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
         }
         if (cipher === "substitution" && data.meta.key) {
@@ -286,8 +282,8 @@ function initEncryptPanel() {
       }
       const badge = $("enc-meta-badge");
       if (badge) {
-          badge.textContent = metaText;
-          badge.classList.remove("hidden");
+        badge.textContent = metaText;
+        badge.classList.remove("hidden");
       }
 
       showToast("Encryption complete ✓", "success");
@@ -406,11 +402,7 @@ function initDecryptPanel() {
         if (cipher === "caesar" && data.meta.shift != null) {
           metaText += ` | Shift: ${data.meta.shift}`;
         }
-        if (
-          cipher === "affine" &&
-          data.meta.a != null &&
-          data.meta.b != null
-        ) {
+        if (cipher === "affine" && data.meta.a != null && data.meta.b != null) {
           metaText += ` | a: ${data.meta.a}, b: ${data.meta.b}`;
         }
         if (cipher === "substitution" && data.meta.key) {
@@ -422,8 +414,8 @@ function initDecryptPanel() {
       }
       const badge = $("dec-meta-badge");
       if (badge) {
-          badge.textContent = metaText;
-          badge.classList.remove("hidden");
+        badge.textContent = metaText;
+        badge.classList.remove("hidden");
       }
 
       // Immediately load frequency data for the decrypted result
