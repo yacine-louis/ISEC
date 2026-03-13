@@ -184,6 +184,8 @@ function initEncryptPanel() {
     const language = $("enc-language").value;
     const placeholders = {
       english: "abcdefghijklmnopqrstuvwxyz",
+      french: "abcdefghijklmnopqrstuvwxyzéèêàâîïôûçœùëü",
+      kabyle: "abcdefghijklmnqrstuwxyzɣɛḍḥṭẓčǧ",
       arabic: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
     };
     if ($("enc-cipher").value === "substitution") {
@@ -240,6 +242,8 @@ function initEncryptPanel() {
       body.key = $("enc-key").value.trim();
       const alphabets = {
         english: "abcdefghijklmnopqrstuvwxyz",
+        french: "abcdefghijklmnopqrstuvwxyzéèêàâîïôûçœùëü",
+        kabyle: "abcdefghijklmnqrstuwxyzɣɛḍḥṭẓčǧ",
         arabic: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
       };
       const alphabet = alphabets[language];
@@ -307,6 +311,8 @@ function updateEncCipherParams() {
   const language = $("enc-language").value;
   const placeholders = {
     english: "abcdefghijklmnopqrstuvwxyz",
+    french: "abcdefghijklmnopqrstuvwxyzéèêàâîïôûçœùëü",
+    kabyle: "abcdefghijklmnqrstuwxyzɣɛḍḥṭẓčǧ",
     arabic: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
   };
   $("enc-caesar-params").classList.toggle("hidden", c !== "caesar");
@@ -322,6 +328,8 @@ $("enc-shuffle-key").addEventListener("click", () => {
   const language = $("enc-language").value;
   const alphabets = {
     english: "abcdefghijklmnopqrstuvwxyz",
+    french: "abcdefghijklmnopqrstuvwxyzéèêàâîïôûçœùëü",
+    kabyle: "abcdefghijklmnqrstuwxyzɣɛḍḥṭẓčǧ",
     arabic: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
   };
   const alphabet = alphabets[language];
@@ -341,9 +349,7 @@ function initDecryptPanel() {
     $("dec-char-count").textContent = input.value.length;
   });
 
-  $("dec-language").addEventListener("change", () => {
-    const language = $("dec-language").value;
-  });
+  $("dec-method").addEventListener("change", () => updateDecParams());
   $("dec-cipher").addEventListener("change", () => updateDecParams());
   updateDecParams();
 
@@ -376,21 +382,36 @@ function initDecryptPanel() {
       return;
     }
 
-    const cipher = $("dec-cipher").value;
+    const cipher   = $("dec-cipher").value;
     const language = $("dec-language").value;
-    const body = { text, cipher, language, method: "frequency" };
+    const method   = $("dec-method").value;
+    const body = { text, cipher, language, method };
 
-    const ngram_size = parseInt($("dec-ngram-size").value) || 4;
-    body.ngram_size = ngram_size;
-    if (cipher === "caesar") {
-      const top_n_map = { 1: 10, 2: 20, 3: 50, 4: 100 };
-      body.top_n = top_n_map[ngram_size] || 10;
-    } else if (cipher === "affine") {
-      // Let the backend use its own default (top_n=6) for all ngram sizes,
-      // which matches the behaviour validated in unit tests.
-      // Do not set body.top_n here so the server falls back to the default.
+    if (method === "frequency") {
+      const ngram_size = parseInt($("dec-ngram-size").value) || 4;
+      body.ngram_size = ngram_size;
+      if (cipher === "caesar") {
+        const top_n_map = { 1: 10, 2: 20, 3: 50, 4: 100 };
+        body.top_n = top_n_map[ngram_size] || 10;
+      } else if (cipher === "affine") {
+        // backend uses its own default for affine
+      } else {
+        body.top_n = 10;
+      }
     } else {
-      body.top_n = 10;
+      // method === "key"
+      if (cipher === "caesar") {
+        body.shift = parseInt($("dec-shift").value) || 3;
+      } else if (cipher === "affine") {
+        body.a = parseInt($("dec-a").value) || 5;
+        body.b = parseInt($("dec-b").value) || 8;
+      } else if (cipher === "substitution") {
+        body.key = $("dec-key").value.trim();
+        if (!body.key) {
+          showToast("Please enter the substitution key", "error");
+          return;
+        }
+      }
     }
 
     setStatus("Decrypting…", "busy");
@@ -463,10 +484,20 @@ function initDecryptPanel() {
 
 function updateDecParams() {
   const cipher = $("dec-cipher").value;
+  const method = $("dec-method").value;
+  const isFreq = method === "frequency";
+  const isKey  = method === "key";
+
+  // frequency params visible only when method=frequency
   $("dec-freq-params").classList.toggle(
     "hidden",
-    !(cipher === "caesar" || cipher === "affine" || cipher === "substitution"),
+    !(isFreq && (cipher === "caesar" || cipher === "affine" || cipher === "substitution")),
   );
+
+  // known-key params: only show when method=key, per cipher
+  $("dec-key-caesar-params").classList.toggle("hidden", !(isKey && cipher === "caesar"));
+  $("dec-key-affine-params").classList.toggle("hidden", !(isKey && cipher === "affine"));
+  $("dec-key-sub-params").classList.toggle("hidden", !(isKey && cipher === "substitution"));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

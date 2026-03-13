@@ -26,6 +26,8 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 ALPHABETS = {
     "english": "abcdefghijklmnopqrstuvwxyz",
     "arabic": "ابتثجحخدذرزسشصضطظعغفقكلمنهوي",
+    "french": "abcdefghijklmnopqrstuvwxyzéèêàâîïôûçœùëü",
+    "kabyle": "abcdefghijklmnqrstuwxyzɣɛḍḥṭẓčǧ",
 }
 
 FREQ_PATHS = {
@@ -40,6 +42,18 @@ FREQ_PATHS = {
         2: os.path.join(ROOT, "grams", "arabic_2grams.json"),
         3: os.path.join(ROOT, "grams", "arabic_3grams.json"),
         4: os.path.join(ROOT, "grams", "arabic_4grams.json"),
+    },
+    "french": {
+        1: os.path.join(ROOT, "grams", "french_1grams.json"),
+        2: os.path.join(ROOT, "grams", "french_2grams.json"),
+        3: os.path.join(ROOT, "grams", "french_3grams.json"),
+        4: os.path.join(ROOT, "grams", "french_4grams.json"),
+    },
+    "kabyle": {
+        1: os.path.join(ROOT, "grams", "kabyle_1grams.json"),
+        2: os.path.join(ROOT, "grams", "kabyle_2grams.json"),
+        3: os.path.join(ROOT, "grams", "kabyle_3grams.json"),
+        4: os.path.join(ROOT, "grams", "kabyle_4grams.json"),
     },
 }
 
