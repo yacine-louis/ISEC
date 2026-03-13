@@ -403,8 +403,13 @@ body {
   line-height: 1.7;
   color: var(--accent-2);
   overflow-y: auto;
+  overflow-x: hidden;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-wrap: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  width: 100%;
+  max-width: 100%;
   position: relative;
 }
 .output-placeholder {
